@@ -21,7 +21,9 @@ function Reports() {
     }
 
     try {
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/reportes/${selectedReport}?start=${dates.start}&end=${dates.end}&format=${format}`);
+      const response = await fetch(
+          `https://sara2backend-production.up.railway.app/api/reportes/${selectedReport}/${format}?start=${dates.start}&end=${dates.end}`
+      );
 
       if (response.ok) {
         const blob = await response.blob();

@@ -22,10 +22,12 @@ function Reservations() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/calendario");
+        const response = await fetch("https://sara2backend-production.up.railway.app/api/reservations");
         if (response.ok) {
           const data = await response.json();
-          setReservations(data.reservaciones || []);
+          // ⚠️ Verifica la clave real del JSON: puede venir como data.reservations
+          // en vez de data.reservaciones ahora que el endpoint cambió de nombre.
+          setReservations(data.reservations ?? data.reservaciones ?? []);
         } else {
           setReservations([]);
         }
@@ -62,7 +64,7 @@ function Reservations() {
         status: "Reservado",
       };
 
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/calendario/reservar", {
+      const response = await fetch("https://sara2backend-production.up.railway.app/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newReservation),
@@ -86,9 +88,10 @@ function Reservations() {
     if (!reservationToCancel) return;
 
     try {
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/calendario/cancelar/${reservationToCancel.id}`, {
-        method: "PUT",
-      });
+      const response = await fetch(
+          `https://sara2backend-production.up.railway.app/api/reservations/${reservationToCancel.id}/cancel`,
+          { method: "PATCH" }
+      );
 
       if (response.ok) {
         setReservations((current) =>
@@ -108,7 +111,9 @@ function Reservations() {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/reportes/reservas/excel");
+      // ⚠️ Ajusta "reservations" si el backend espera otro valor de report_type
+      // (revisa qué acepta /api/reportes/{report_type}/{report_format})
+      const response = await fetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/xlsx");
       if (!response.ok) throw new Error("Error al descargar el archivo");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

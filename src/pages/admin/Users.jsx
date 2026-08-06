@@ -53,7 +53,7 @@ function Users() {
     event.preventDefault();
     try {
       const newUser = { ...form, status: "Activo" };
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios/registrar", {
+      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),
@@ -78,8 +78,8 @@ function Users() {
       const user = users.find(u => u.id === id);
       const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
 
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/estado/${id}`, {
-        method: "PUT",
+      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });

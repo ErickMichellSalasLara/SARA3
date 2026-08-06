@@ -12,7 +12,7 @@ function Audit() {
   useEffect(() => {
     const fetchAudit = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/auditoria");
+          const response = await fetch("https://sara2backend-production.up.railway.app/api/auditoria/historial");
         if (response.ok) {
           const data = await response.json();
           setAuditRecords(data.auditoria || []);
