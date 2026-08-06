@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import "./AdminModules.css";
 
@@ -21,7 +22,7 @@ function Reports() {
     }
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
           `https://sara2backend-production.up.railway.app/api/reportes/${selectedReport}/${format}?start=${dates.start}&end=${dates.end}`
       );
 

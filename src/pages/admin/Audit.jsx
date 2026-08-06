@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import ModuleToolbar from "../../components/admin/modules/ModuleToolbar";
 import EmptyState from "../../components/admin/modules/EmptyState";
@@ -12,7 +13,7 @@ function Audit() {
   useEffect(() => {
     const fetchAudit = async () => {
       try {
-          const response = await fetch("https://sara2backend-production.up.railway.app/api/auditoria/historial");
+          const response = await apiFetch("https://sara2backend-production.up.railway.app/api/auditoria/historial");
         if (response.ok) {
           const data = await response.json();
           setAuditRecords(data.auditoria || []);

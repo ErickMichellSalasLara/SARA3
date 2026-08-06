@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import ModuleToolbar from "../../components/admin/modules/ModuleToolbar";
 import AdminModal from "../../components/admin/modules/AdminModal";
@@ -28,7 +29,7 @@ function Loans() {
     // 3. Función para recargar la tabla de préstamos
     const fetchLoans = async () => {
         try {
-            const response = await fetch("https://sara2backend-production.up.railway.app/api/prestamos/historial", {
+            const response = await apiFetch("https://sara2backend-production.up.railway.app/api/prestamos/historial", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -52,7 +53,7 @@ function Loans() {
         // 4. Petición para cargar los catálogos y llenar los <select>
         const fetchCatalogs = async () => {
             try {
-                const response = await fetch("https://sara2backend-production.up.railway.app/api/prestamos/catalogos", {
+                const response = await apiFetch("https://sara2backend-production.up.railway.app/api/prestamos/catalogos", {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
@@ -107,7 +108,7 @@ function Loans() {
                 due_date: form.due_date
             };
 
-            const response = await fetch("https://sara2backend-production.up.railway.app/api/prestamos/registrar", {
+            const response = await apiFetch("https://sara2backend-production.up.railway.app/api/prestamos/registrar", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,7 +133,7 @@ function Loans() {
 
     const returnLoan = async (id) => {
         try {
-            const response = await fetch(`https://sara2backend-production.up.railway.app/api/prestamos/devolver/${id}`, {
+            const response = await apiFetch(`https://sara2backend-production.up.railway.app/api/prestamos/devolver/${id}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`

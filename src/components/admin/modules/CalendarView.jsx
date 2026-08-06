@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../../utils/api";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -17,7 +18,7 @@ function CalendarView({ onDateClick }) {
                 setIsLoading(true);
 
                 // 1. Petición a tu FastAPI para los Días Festivos
-                const resHolidays = await fetch("https://sara2backend-production.up.railway.app/api/calendario/dias-festivos");
+                const resHolidays = await apiFetch("https://sara2backend-production.up.railway.app/api/calendario/dias-festivos");
                 const holidaysData = await resHolidays.json();
 
                 const holidayEvents = (holidaysData.festivos || []).map((h) => ({
@@ -28,7 +29,7 @@ function CalendarView({ onDateClick }) {
                 }));
 
                 // 2. Petición a tu FastAPI para los Eventos de Google Calendar
-                const resEvents = await fetch("https://sara2backend-production.up.railway.app/api/calendario/eventos");
+                const resEvents = await apiFetch("https://sara2backend-production.up.railway.app/api/calendario/eventos");
                 const googleData = await resEvents.json();
 
                 const googleEvents = (googleData.eventos || []).map((evt) => ({

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import ModuleToolbar from "../../components/admin/modules/ModuleToolbar";
 import AdminModal from "../../components/admin/modules/AdminModal";
@@ -22,7 +23,7 @@ function Reservations() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/reservations");
+        const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reservations");
         if (response.ok) {
           const data = await response.json();
           // ⚠️ Verifica la clave real del JSON: puede venir como data.reservations
@@ -64,7 +65,7 @@ function Reservations() {
         status: "Reservado",
       };
 
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/reservations", {
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newReservation),
@@ -88,7 +89,7 @@ function Reservations() {
     if (!reservationToCancel) return;
 
     try {
-      const response = await fetch(
+      const response = await apiFetch(
           `https://sara2backend-production.up.railway.app/api/reservations/${reservationToCancel.id}/cancel`,
           { method: "PATCH" }
       );
@@ -113,7 +114,7 @@ function Reservations() {
     try {
       // ⚠️ Ajusta "reservations" si el backend espera otro valor de report_type
       // (revisa qué acepta /api/reportes/{report_type}/{report_format})
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/xlsx");
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/xlsx");
       if (!response.ok) throw new Error("Error al descargar el archivo");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { apiFetch } from "../../utils/api";
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
 import PasswordInput from "../components/auth/PasswordInput";
@@ -103,7 +103,7 @@ function Login() {
       setIsLoading(true);
       setMessage({ type: "", text: "" });
 
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/auth/login", {
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
