@@ -11,6 +11,14 @@ export async function apiFetch(pathOrUrl, options = {}) {
     const url = pathOrUrl.startsWith("http") ? pathOrUrl : `${API_BASE}${pathOrUrl}`;
     const isAuthEndpoint = url.includes("/api/auth/");
 
+    const finalHeaders = {
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+    };
+
+    console.log("🔍 apiFetch ->", url, "| token:", token, "| headers:", finalHeaders); // TEMPORAL
+
     const response = await fetch(url, {
         ...options,
         headers: {
