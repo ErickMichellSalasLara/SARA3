@@ -16,7 +16,22 @@ function Audit() {
                 const response = await apiFetch("https://sara2backend-production.up.railway.app/api/auditoria/historial");
                 if (response.ok) {
                     const data = await response.json();
-                    setAuditRecords(data.auditoria || []);
+                    const rawRecords = Array.isArray(data)
+                        ? data
+                        : (data.auditoria || data.historial || data.records || []);
+
+                    // Mapeo flexible para aceptar campos en español (SQL) o en inglés
+                    const mapped = rawRecords.map((item, index) => ({
+                        id: item.id || index,
+                        admin: item.administrador || item.admin || "N/A",
+                        action: item.accion || item.action || "N/A",
+                        module: item.modulo || item.module || "N/A",
+                        record: item.registro || item.record || "N/A",
+                        date: item.fecha || item.occurred_at || item.date || "N/A",
+                        ip: item.direccion_ip || item.ip || item.ip_address || "N/A"
+                    }));
+
+                    setAuditRecords(mapped);
                 } else {
                     setAuditRecords([]);
                 }
@@ -37,7 +52,7 @@ function Audit() {
             const moduleStr = item.module?.toLowerCase() || "";
 
             const matchesSearch = adminStr.includes(query) || actionStr.includes(query) || recordStr.includes(query);
-            const matchesModule = module === "all" || moduleStr === module;
+            const matchesModule = module === "all" || moduleStr === module.toLowerCase();
 
             return matchesSearch && matchesModule;
         });
@@ -54,6 +69,7 @@ function Audit() {
                     filter={module}
                     onFilter={setModule}
                     filterOptions={[
+                        { value: "autenticación", label: "Autenticación" },
                         { value: "reservas", label: "Reservas" },
                         { value: "préstamos", label: "Préstamos" },
                         { value: "usuarios", label: "Usuarios" },
@@ -63,11 +79,25 @@ function Audit() {
                 {filteredRecords.length > 0 ? (
                     <div className="module-table-wrapper">
                         <table className="module-table">
-                            <thead><tr><th>Administrador</th><th>Acción</th><th>Módulo</th><th>Registro</th><th>Fecha</th><th>Dirección IP</th></tr></thead>
+                            <thead>
+                            <tr>
+                                <th>Administrador</th>
+                                <th>Acción</th>
+                                <th>Módulo</th>
+                                <th>Registro</th>
+                                <th>Fecha</th>
+                                <th>Dirección IP</th>
+                            </tr>
+                            </thead>
                             <tbody>
                             {filteredRecords.map((item) => (
                                 <tr key={item.id}>
-                                    <td>{item.admin}</td><td>{item.action}</td><td>{item.module}</td><td>{item.record}</td><td>{item.date}</td><td>{item.ip}</td>
+                                    <td>{item.admin}</td>
+                                    <td>{item.action}</td>
+                                    <td>{item.module}</td>
+                                    <td>{item.record}</td>
+                                    <td>{item.date}</td>
+                                    <td>{item.ip}</td>
                                 </tr>
                             ))}
                             </tbody>
