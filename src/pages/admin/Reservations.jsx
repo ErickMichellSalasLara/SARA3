@@ -26,8 +26,6 @@ function Reservations() {
         const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reservations");
         if (response.ok) {
           const data = await response.json();
-          // ⚠️ Verifica la clave real del JSON: puede venir como data.reservations
-          // en vez de data.reservaciones ahora que el endpoint cambió de nombre.
           setReservations(data.reservations ?? data.reservaciones ?? []);
         } else {
           setReservations([]);
@@ -112,9 +110,8 @@ function Reservations() {
 
   const handleDownloadExcel = async () => {
     try {
-      // ⚠️ Ajusta "reservations" si el backend espera otro valor de report_type
-      // (revisa qué acepta /api/reportes/{report_type}/{report_format})
-      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/xlsx");
+      // ⚠️ CAMBIO: Se ajustó a "reservas" en la URL
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservas/xlsx");
       if (!response.ok) throw new Error("Error al descargar el archivo");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

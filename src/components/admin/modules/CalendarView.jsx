@@ -4,7 +4,6 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-// NUEVO: Importamos el idioma español para que no marque error el locale
 import esLocale from '@fullcalendar/core/locales/es';
 
 function CalendarView({ onDateClick }) {
@@ -12,7 +11,6 @@ function CalendarView({ onDateClick }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Mover la función ADENTRO del useEffect soluciona los errores de dependencias y linting
         const fetchCalendarData = async () => {
             try {
                 setIsLoading(true);
@@ -49,17 +47,16 @@ function CalendarView({ onDateClick }) {
             }
         };
 
-        // Ejecutamos la función
         fetchCalendarData();
-    }, []); // Al estar vacíos los corchetes, solo se ejecuta una vez al montar el componente
+    }, []);
 
     if (isLoading) {
-        return <div style={{ padding: "20px" }}>Cargando calendario de S.A.R.A...</div>;
+        return <div style={{ padding: "20px", color: "#666" }}>Cargando calendario de S.A.R.A...</div>;
     }
 
     return (
-        <div style={{ padding: "20px", background: "#674487", borderRadius: "16px" }}>
-            <h2 style={{ color: "#fff" }}>Calendario de Reservas y Disponibilidad</h2>
+        <div style={{ padding: "20px", background: "#ffffff", borderRadius: "16px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid #eaeaea" }}>
+            <h2 style={{ color: "#333", marginBottom: "20px", fontSize: "1.5rem", fontWeight: "600" }}>Calendario de Reservas y Disponibilidad</h2>
 
             <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -69,7 +66,7 @@ function CalendarView({ onDateClick }) {
                     center: "title",
                     right: "dayGridMonth,timeGridWeek,timeGridDay",
                 }}
-                locale={esLocale} // NUEVO: Usamos el objeto de idioma importado
+                locale={esLocale}
                 events={events}
                 height="75vh"
                 dateClick={(info) => {

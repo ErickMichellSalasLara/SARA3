@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import ModuleToolbar from "../../components/admin/modules/ModuleToolbar";
 import AdminModal from "../../components/admin/modules/AdminModal";
@@ -19,7 +20,7 @@ function Users() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios");
+        const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios");
         if (response.ok) {
           const data = await response.json();
           setUsers(data.usuarios || []);
@@ -53,7 +54,8 @@ function Users() {
     event.preventDefault();
     try {
       const newUser = { ...form, status: "Activo" };
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios/registrar", {
+      // Actualizado al endpoint correcto según Swagger
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),
@@ -78,8 +80,9 @@ function Users() {
       const user = users.find(u => u.id === id);
       const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
 
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/estado/${id}`, {
-        method: "PUT",
+      // Actualizado a PATCH y a la ruta correcta según Swagger
+      const response = await apiFetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -98,6 +101,7 @@ function Users() {
     }
   };
 
+  // ... (El resto del return/JSX se mantiene idéntico)
   return (
       <section className="module-page">
         <ModuleHeader

@@ -4,14 +4,14 @@ import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import "./AdminModules.css";
 
 const reportCards = [
-  { id: "accesses", title: "Reporte de accesos", description: "Entradas, salidas, denegaciones y afluencia." },
-  { id: "reservations", title: "Reporte de reservas", description: "Uso, cancelaciones y ocupación de cubículos." },
-  { id: "loans", title: "Reporte de préstamos", description: "Préstamos activos, vencidos y devoluciones." },
-  { id: "users", title: "Reporte de usuarios", description: "Cuentas activas, roles y actividad." },
+  { id: "accesos", title: "Reporte de accesos", description: "Entradas, salidas, denegaciones y afluencia." },
+  { id: "reservas", title: "Reporte de reservas", description: "Uso, cancelaciones y ocupación de cubículos." },
+  { id: "prestamos", title: "Reporte de préstamos", description: "Préstamos activos, vencidos y devoluciones." },
+  { id: "usuarios", title: "Reporte de usuarios", description: "Cuentas activas, roles y actividad." },
 ];
 
 function Reports() {
-  const [selectedReport, setSelectedReport] = useState("accesses");
+  const [selectedReport, setSelectedReport] = useState("accesos");
   const [format, setFormat] = useState("csv");
   const [dates, setDates] = useState({ start: "", end: "" });
 
@@ -35,7 +35,7 @@ function Reports() {
         anchor.click();
         URL.revokeObjectURL(url);
       } else {
-        alert("Hubo un error al generar el reporte desde la base de datos.");
+        alert("Hubo un error al generar el reporte desde la base de datos. Verifica los parámetros.");
       }
     } catch (error) {
       console.error("Error al conectar con la base de datos:", error);
