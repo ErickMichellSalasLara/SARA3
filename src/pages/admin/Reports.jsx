@@ -4,14 +4,14 @@ import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import "./AdminModules.css";
 
 const reportCards = [
-  { id: "accesos", title: "Reporte de accesos", description: "Entradas, salidas, denegaciones y afluencia." },
-  { id: "reservas", title: "Reporte de reservas", description: "Uso, cancelaciones y ocupación de cubículos." },
-  { id: "prestamos", title: "Reporte de préstamos", description: "Préstamos activos, vencidos y devoluciones." },
-  { id: "usuarios", title: "Reporte de usuarios", description: "Cuentas activas, roles y actividad." },
+  { id: "accesses", title: "Reporte de accesos", description: "Entradas, salidas, denegaciones y afluencia." },
+  { id: "reservations", title: "Reporte de reservas", description: "Uso, cancelaciones y ocupación de cubículos." },
+  { id: "loans", title: "Reporte de préstamos", description: "Préstamos activos, vencidos y devoluciones." },
+  { id: "users", title: "Reporte de usuarios", description: "Cuentas activas, roles y actividad." },
 ];
 
 function Reports() {
-  const [selectedReport, setSelectedReport] = useState("accesos");
+  const [selectedReport, setSelectedReport] = useState("accesses");
   const [format, setFormat] = useState("csv");
   const [dates, setDates] = useState({ start: "", end: "" });
 
@@ -23,7 +23,7 @@ function Reports() {
 
     try {
       const response = await apiFetch(
-          `https://sara2backend-production.up.railway.app/api/reportes/${selectedReport}/${format}?start=${dates.start}&end=${dates.end}`
+          `https://sara2backend-production.up.railway.app/api/reportes/${selectedReport}/${format}?inicio=${dates.start}&fin=${dates.end}`
       );
 
       if (response.ok) {
@@ -31,7 +31,9 @@ function Reports() {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
         anchor.href = url;
-        anchor.download = `reporte-${selectedReport}.${format}`;
+        // Mapeo inverso para la extensión del archivo a descargar
+        const extension = format === "excel" ? "xlsx" : format;
+        anchor.download = `reporte-${selectedReport}.${extension}`;
         anchor.click();
         URL.revokeObjectURL(url);
       } else {
@@ -67,7 +69,7 @@ function Reports() {
             <label>Formato
               <select value={format} onChange={(e) => setFormat(e.target.value)}>
                 <option value="csv">CSV</option>
-                <option value="xlsx">Excel</option>
+                <option value="excel">Excel</option>
                 <option value="pdf">PDF</option>
               </select>
             </label>

@@ -7,7 +7,7 @@ import ModuleStatus from "../../components/admin/modules/ModuleStatus";
 import EmptyState from "../../components/admin/modules/EmptyState";
 import "./AdminModules.css";
 
-const emptyForm = { name: "", email: "", enrollment: "", role: "Estudiante" };
+const emptyForm = { name: "", email: "", enrollment: "", role: "student", password: "" };
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -17,30 +17,40 @@ function Users() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios");
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data.usuarios || []);
-        } else {
-          setUsers([]);
-        }
-      } catch (error) {
-        console.error("Error al conectar con la base de datos:", error);
+  // Función para recargar los usuarios desde la API
+  const fetchUsers = async () => {
+    try {
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios");
+      if (response.ok) {
+        const data = await response.json();
+        // ⚠️ CAMBIO CLAVE: Leer 'data.users'
+        setUsers(data.users || data.usuarios || []);
+      } else {
         setUsers([]);
       }
-    };
+    } catch (error) {
+      console.error("Error al conectar con la base de datos:", error);
+      setUsers([]);
+    }
+  };
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 
   const filteredUsers = useMemo(() => {
     return users.filter((item) => {
+      const nameStr = item.name?.toLowerCase() || "";
+      const emailStr = item.email?.toLowerCase() || "";
+      const enrollmentStr = item.enrollment?.toLowerCase() || "";
+      const roleStr = item.roleCode?.toLowerCase() || item.role?.toLowerCase() || "";
+      const statusStr = item.statusCode?.toLowerCase() || item.status?.toLowerCase() || "";
+
       const query = search.trim().toLowerCase();
-      const matchesSearch = item.name.toLowerCase().includes(query) || item.email.toLowerCase().includes(query) || item.enrollment.toLowerCase().includes(query);
-      const matchesRole = role === "all" || item.role.toLowerCase() === role;
-      const matchesStatus = status === "all" || item.status.toLowerCase() === status;
+      const matchesSearch = nameStr.includes(query) || emailStr.includes(query) || enrollmentStr.includes(query);
+      const matchesRole = role === "all" || roleStr === role;
+      const matchesStatus = status === "all" || statusStr === status;
+
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users, search, role, status]);
@@ -53,8 +63,8 @@ function Users() {
   const saveUser = async (event) => {
     event.preventDefault();
     try {
-      const newUser = { ...form, status: "Activo" };
-      // Actualizado al endpoint correcto según Swagger
+      const newUser = { ...form };
+
       const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,10 +72,11 @@ function Users() {
       });
 
       if (response.ok) {
-        const createdUser = await response.json();
-        setUsers((current) => [...current, { id: createdUser.id, ...newUser }]);
+        alert("Usuario creado correctamente");
+        await fetchUsers(); // Recargamos para traer los datos limpios de BD
       } else {
-        console.error("No se pudo crear el usuario en la base de datos");
+        const errorData = await response.json();
+        alert(`Error: ${errorData.detail || "No se pudo crear el usuario"}`);
       }
     } catch (error) {
       console.error("Error al crear usuario:", error);
@@ -78,9 +89,10 @@ function Users() {
   const toggleUserStatus = async (id) => {
     try {
       const user = users.find(u => u.id === id);
-      const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
+      // ⚠️ CAMBIO CLAVE: Enviar 'active' o 'inactive'
+      const isCurrentlyActive = user.statusCode === "active" || user.status === "Activo";
+      const newStatus = isCurrentlyActive ? "inactive" : "active";
 
-      // Actualizado a PATCH y a la ruta correcta según Swagger
       const response = await apiFetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -88,20 +100,16 @@ function Users() {
       });
 
       if (response.ok) {
-        setUsers((current) =>
-            current.map((item) =>
-                item.id === id ? { ...item, status: newStatus } : item
-            )
-        );
+        await fetchUsers(); // Recargamos para reflejar el estado actual
       } else {
-        console.error("No se pudo actualizar el estado en la base de datos");
+        const errorData = await response.json();
+        alert(`Error: ${errorData.detail || "No se pudo actualizar el estado"}`);
       }
     } catch (error) {
       console.error("Error al cambiar estado:", error);
     }
   };
 
-  // ... (El resto del return/JSX se mantiene idéntico)
   return (
       <section className="module-page">
         <ModuleHeader
@@ -120,16 +128,17 @@ function Users() {
               filter={role}
               onFilter={setRole}
               filterOptions={[
-                { value: "estudiante", label: "Estudiantes" },
-                { value: "docente", label: "Docentes" },
-                { value: "bibliotecario", label: "Bibliotecarios" },
-                { value: "administrador", label: "Administradores" },
+                { value: "student", label: "Estudiantes" },
+                { value: "teacher", label: "Docentes" },
+                { value: "librarian", label: "Bibliotecarios" },
+                { value: "admin", label: "Administradores" },
               ]}
               secondaryFilter={status}
               onSecondaryFilter={setStatus}
               secondaryOptions={[
-                { value: "activo", label: "Activos" },
-                { value: "inactivo", label: "Inactivos" },
+                { value: "active", label: "Activos" },
+                { value: "inactive", label: "Inactivos" },
+                { value: "blocked", label: "Bloqueados" },
               ]}
           />
 
@@ -142,10 +151,11 @@ function Users() {
                   <tbody>
                   {filteredUsers.map((item) => (
                       <tr key={item.id}>
-                        <td>{item.name}</td><td>{item.email}</td><td>{item.enrollment}</td><td>{item.role}</td><td><ModuleStatus value={item.status} /></td>
+                        <td>{item.name}</td><td>{item.email}</td><td>{item.enrollment}</td><td>{item.role}</td>
+                        <td><ModuleStatus value={item.statusCode || item.status} /></td>
                         <td>
                           <button type="button" className="module-link-button" onClick={() => toggleUserStatus(item.id)}>
-                            {item.status === "Activo" ? "Desactivar" : "Activar"}
+                            {(item.statusCode === "active" || item.status === "Activo") ? "Desactivar" : "Activar"}
                           </button>
                         </td>
                       </tr>
@@ -162,13 +172,16 @@ function Users() {
           <form className="module-form" onSubmit={saveUser}>
             <label>Nombre completo <input name="name" value={form.name} onChange={handleChange} required /></label>
             <label>Correo institucional <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="usuario@utr.edu.mx" required /></label>
-            <label>Matrícula o identificador <input name="enrollment" value={form.enrollment} onChange={handleChange} required /></label>
+            <div className="module-form-grid">
+              <label>Matrícula <input name="enrollment" value={form.enrollment} onChange={handleChange} required /></label>
+              <label>Contraseña <input name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Mínimo 8 caracteres" /></label>
+            </div>
             <label>Rol
-              <select name="role" value={form.role} onChange={handleChange}>
-                <option>Estudiante</option>
-                <option>Docente</option>
-                <option>Bibliotecario</option>
-                <option>Administrador</option>
+              <select name="role" value={form.role} onChange={handleChange} required>
+                <option value="student">Estudiante</option>
+                <option value="teacher">Docente</option>
+                <option value="librarian">Bibliotecario</option>
+                <option value="admin">Administrador</option>
               </select>
             </label>
             <div className="module-form-actions">

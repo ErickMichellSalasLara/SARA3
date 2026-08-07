@@ -61,10 +61,9 @@ function Loans() {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    // NOTA: Ajusta "usuarios" y "materiales" si tu API los manda con otro nombre
                     setCatalogs({
-                        users: data.usuarios || [],
-                        materials: data.materiales || []
+                        users: data.users || [],
+                        materials: data.materials || []
                     });
                 }
             } catch (error) {
