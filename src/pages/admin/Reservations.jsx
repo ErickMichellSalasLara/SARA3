@@ -132,8 +132,10 @@ function Reservations() {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/excel");
+      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservations/excel?inicio=2026-08-01&fin=2026-08-31");
+
       if (!response.ok) throw new Error("Error al descargar el archivo");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");

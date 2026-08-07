@@ -1,7 +1,8 @@
 export async function getAdminDashboardData() {
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
-  const response = await fetch("/api/dashboard/summary", {
+  // ¡Agregamos la URL de Railway aquí!
+  const response = await fetch("https://sara2backend-production.up.railway.app/api/dashboard/summary", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
