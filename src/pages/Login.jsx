@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiFetch } from "../../utils/api";
+import { apiFetch } from "../utils/api";
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
 import PasswordInput from "../components/auth/PasswordInput";

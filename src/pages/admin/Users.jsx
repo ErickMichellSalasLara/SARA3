@@ -15,19 +15,14 @@ function Users() {
   const [status, setStatus] = useState("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+        const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios");
         if (response.ok) {
           const data = await response.json();
-          setUsers(data.users || data.usuarios || []);
+          setUsers(data.usuarios || []);
         } else {
           setUsers([]);
         }
@@ -37,7 +32,7 @@ function Users() {
       }
     };
     fetchUsers();
-  }, [token]);
+  }, []);
 
   const filteredUsers = useMemo(() => {
     return users.filter((item) => {
@@ -58,12 +53,9 @@ function Users() {
     event.preventDefault();
     try {
       const newUser = { ...form, status: "Activo" };
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
+      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios/registrar", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),
       });
 
@@ -86,12 +78,9 @@ function Users() {
       const user = users.find(u => u.id === id);
       const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
 
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/estado/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -113,7 +102,7 @@ function Users() {
       <section className="module-page">
         <ModuleHeader
             eyebrow="Cuentas"
-            title="Prueba visua,"
+            title="Usuarios"
             description="Administra cuentas, roles y estados de acceso al sistema."
             actionLabel="Nuevo usuario"
             onAction={() => setIsFormOpen(true)}
