@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from "react";
-import { apiFetch } from "../../utils/api";
 import ModuleHeader from "../../components/admin/modules/ModuleHeader";
 import ModuleToolbar from "../../components/admin/modules/ModuleToolbar";
 import AdminModal from "../../components/admin/modules/AdminModal";
@@ -16,14 +15,19 @@ function Users() {
   const [status, setStatus] = useState("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios");
+        const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
         if (response.ok) {
           const data = await response.json();
-          setUsers(data.usuarios || []);
+          setUsers(data.users || data.usuarios || []);
         } else {
           setUsers([]);
         }
@@ -33,7 +37,7 @@ function Users() {
       }
     };
     fetchUsers();
-  }, []);
+  }, [token]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((item) => {
@@ -54,9 +58,12 @@ function Users() {
     event.preventDefault();
     try {
       const newUser = { ...form, status: "Activo" };
-      const response = await apiFetch("https://sara2backend-production.up.railway.app/api/usuarios", {
+      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify(newUser),
       });
 
@@ -79,9 +86,12 @@ function Users() {
       const user = users.find(u => u.id === id);
       const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
 
-      const response = await apiFetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
+      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
