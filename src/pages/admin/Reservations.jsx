@@ -9,7 +9,15 @@ import EmptyState from "../../components/admin/modules/EmptyState";
 import CalendarView from "../../components/admin/modules/CalendarView";
 import "./AdminModules.css";
 
-const emptyForm = { room: "", user: "", date: "", startTime: "", endTime: "" };
+const emptyForm = {
+  cubicle_id: "",
+  user_id: "",
+  reservation_date: "",
+  start_time: "",
+  end_time: "",
+  purpose: "Estudio académico",
+  number_of_people: 1,
+};
 
 function Reservations() {
   const [reservations, setReservations] = useState([]);
@@ -41,8 +49,12 @@ function Reservations() {
   const filteredReservations = useMemo(() => {
     return reservations.filter((item) => {
       const query = search.trim().toLowerCase();
-      const matchesSearch = item.room.toLowerCase().includes(query) || item.user.toLowerCase().includes(query);
-      const matchesStatus = status === "all" || item.status.toLowerCase() === status;
+      const roomStr = item.room?.toLowerCase() || "";
+      const userStr = item.user?.toLowerCase() || "";
+      const statusStr = item.status?.toLowerCase() || "";
+
+      const matchesSearch = roomStr.includes(query) || userStr.includes(query);
+      const matchesStatus = status === "all" || statusStr === status;
       return matchesSearch && matchesStatus;
     });
   }, [reservations, search, status]);
@@ -55,28 +67,38 @@ function Reservations() {
   const saveReservation = async (event) => {
     event.preventDefault();
     try {
-      const newReservation = {
-        room: form.room,
-        user: form.user,
-        date: form.date,
-        time: `${form.startTime} - ${form.endTime}`,
-        status: "Reservado",
+      // Estructura exacta que espera el DTO ReservationCreate de FastAPI
+      const payload = {
+        cubicle_id: Number(form.cubicle_id),
+        user_id: form.user_id ? Number(form.user_id) : null,
+        reservation_date: form.reservation_date,
+        start_time: form.start_time.length === 5 ? `${form.start_time}:00` : form.start_time,
+        end_time: form.end_time.length === 5 ? `${form.end_time}:00` : form.end_time,
+        purpose: form.purpose,
+        number_of_people: Number(form.number_of_people),
       };
 
       const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newReservation),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        const createdReservation = await response.json();
-        setReservations((current) => [...current, { id: createdReservation.id, ...newReservation }]);
+        // Recargamos la lista de reservas para ver reflejado el cambio
+        const updatedRes = await apiFetch("https://sara2backend-production.up.railway.app/api/reservations");
+        if (updatedRes.ok) {
+          const data = await updatedRes.json();
+          setReservations(data.reservations ?? []);
+        }
+        alert("Reserva creada correctamente.");
       } else {
-        console.error("No se pudo guardar la reserva en la base de datos");
+        const errData = await response.json().catch(() => ({}));
+        alert(`No se pudo guardar la reserva: ${errData.detail || "Error desconocido"}`);
       }
     } catch (error) {
       console.error("Error al guardar reserva:", error);
+      alert("Error de conexión al intentar guardar la reserva.");
     } finally {
       setForm(emptyForm);
       setIsFormOpen(false);
@@ -95,11 +117,11 @@ function Reservations() {
       if (response.ok) {
         setReservations((current) =>
             current.map((item) =>
-                item.id === reservationToCancel.id ? { ...item, status: "Cancelado" } : item
+                item.id === reservationToCancel.id ? { ...item, status: "Cancelado", statusCode: "cancelled" } : item
             )
         );
       } else {
-        console.error("No se pudo cancelar la reserva en la base de datos");
+        alert("No se pudo cancelar la reserva en la base de datos.");
       }
     } catch (error) {
       console.error("Error al cancelar reserva:", error);
@@ -110,7 +132,6 @@ function Reservations() {
 
   const handleDownloadExcel = async () => {
     try {
-      // ⚠️ CAMBIO: Se ajustó a "reservas" en la URL
       const response = await apiFetch("https://sara2backend-production.up.railway.app/api/reportes/reservas/xlsx");
       if (!response.ok) throw new Error("Error al descargar el archivo");
       const blob = await response.blob();
@@ -152,7 +173,7 @@ function Reservations() {
             <div className="module-card">
               <CalendarView
                   onDateClick={(fechaSeleccionada) => {
-                    setForm({ ...emptyForm, date: fechaSeleccionada });
+                    setForm({ ...emptyForm, reservation_date: fechaSeleccionada });
                     setIsFormOpen(true);
                   }}
               />
@@ -166,10 +187,10 @@ function Reservations() {
                   filter={status}
                   onFilter={setStatus}
                   filterOptions={[
-                    { value: "reservado", label: "Reservados" },
-                    { value: "ocupado", label: "Ocupados" },
-                    { value: "cancelado", label: "Cancelados" },
-                    { value: "mantenimiento", label: "Mantenimiento" },
+                    { value: "confirmed", label: "Reservados" },
+                    { value: "active", label: "Ocupados" },
+                    { value: "cancelled", label: "Cancelados" },
+                    { value: "pending", label: "Pendientes" },
                   ]}
               />
               {filteredReservations.length > 0 ? (
@@ -183,7 +204,7 @@ function Reservations() {
                           <tr key={item.id}>
                             <td>{item.room}</td><td>{item.user}</td><td>{item.date}</td><td>{item.time}</td><td><ModuleStatus value={item.status} /></td>
                             <td>
-                              <button type="button" className="module-link-button" disabled={item.status === "Cancelado" || item.status === "Mantenimiento"} onClick={() => setReservationToCancel(item)}>Cancelar</button>
+                              <button type="button" className="module-link-button" disabled={item.statusCode === "cancelled" || item.statusCode === "completed"} onClick={() => setReservationToCancel(item)}>Cancelar</button>
                             </td>
                           </tr>
                       ))}
@@ -200,20 +221,22 @@ function Reservations() {
           <form className="module-form" onSubmit={saveReservation}>
             <label>
               Cubículo
-              <select name="room" value={form.room} onChange={handleChange} required>
+              <select name="cubicle_id" value={form.cubicle_id} onChange={handleChange} required>
                 <option value="">Selecciona un cubículo</option>
-                <option value="Africa">África</option>
-                <option value="America">América</option>
-                <option value="Oceania">Oceanía</option>
-                <option value="Asia">Asia</option>
+                <option value="1">África</option>
+                <option value="2">América</option>
+                <option value="3">Oceanía</option>
+                <option value="4">Asia</option>
               </select>
             </label>
-            <label>Usuario <input name="user" value={form.user} onChange={handleChange} placeholder="Nombre o matrícula" required /></label>
-            <label>Fecha <input name="date" type="date" value={form.date} onChange={handleChange} required /></label>
+            <label>ID de Usuario (Opcional si eres admin, o déjalo vacío) <input name="user_id" type="number" value={form.user_id} onChange={handleChange} placeholder="Ej. 5" /></label>
+            <label>Fecha <input name="reservation_date" type="date" value={form.reservation_date} onChange={handleChange} required /></label>
             <div className="module-form-grid">
-              <label>Hora inicial <input name="startTime" type="time" value={form.startTime} onChange={handleChange} required /></label>
-              <label>Hora final <input name="endTime" type="time" value={form.endTime} onChange={handleChange} required /></label>
+              <label>Hora inicial <input name="start_time" type="time" value={form.start_time} onChange={handleChange} required /></label>
+              <label>Hora final <input name="end_time" type="time" value={form.end_time} onChange={handleChange} required /></label>
             </div>
+            <label>Propósito <input name="purpose" value={form.purpose} onChange={handleChange} required /></label>
+            <label>Número de personas <input name="number_of_people" type="number" min="1" max="10" value={form.number_of_people} onChange={handleChange} required /></label>
             <div className="module-form-actions">
               <button type="button" onClick={() => setIsFormOpen(false)}>Cancelar</button>
               <button type="submit" className="module-primary-button">Guardar reserva</button>
