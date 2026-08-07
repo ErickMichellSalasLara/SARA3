@@ -7,6 +7,7 @@ import EmptyState from "../../components/admin/modules/EmptyState";
 import "./AdminModules.css";
 
 const emptyForm = { name: "", email: "", enrollment: "", role: "Estudiante" };
+const API_BASE = "https://sara2backend-production.up.railway.app";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -15,16 +16,20 @@ function Users() {
   const [status, setStatus] = useState("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
+
   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
   useEffect(() => {
+    console.log("🔍 Users.jsx token al montar:", token); // TEMPORAL
+
     const fetchUsers = async () => {
       try {
-        const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
+        const response = await fetch(`${API_BASE}/api/usuarios`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
         });
+        console.log("🔍 respuesta /api/usuarios:", response.status); // TEMPORAL
         if (response.ok) {
           const data = await response.json();
           setUsers(data.users || data.usuarios || []);
@@ -58,7 +63,7 @@ function Users() {
     event.preventDefault();
     try {
       const newUser = { ...form, status: "Activo" };
-      const response = await fetch("https://sara2backend-production.up.railway.app/api/usuarios", {
+      const response = await fetch(`${API_BASE}/api/usuarios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,7 +91,7 @@ function Users() {
       const user = users.find(u => u.id === id);
       const newStatus = user.status === "Activo" ? "Inactivo" : "Activo";
 
-      const response = await fetch(`https://sara2backend-production.up.railway.app/api/usuarios/${id}/status`, {
+      const response = await fetch(`${API_BASE}/api/usuarios/${id}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
