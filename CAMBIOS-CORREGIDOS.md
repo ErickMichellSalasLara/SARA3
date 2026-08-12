@@ -24,3 +24,17 @@ npm run dev
 ```
 
 El ZIP no incluye `node_modules`; deben instalarse en la computadora donde se ejecute el proyecto.
+
+## Corrección de visibilidad de botones
+
+Se corrigió una colisión de estilos entre la plantilla pública `assets/css/main.css` y las dashboards.
+
+La plantilla aplicaba `color` y `border` con `!important` a todos los elementos `<button>`. Eso hacía que algunos botones específicos de las dashboards heredaran texto blanco sobre fondos claros o conservaran tamaños y espaciados de la plantilla pública.
+
+### Cambios realizados
+- Se eliminaron los `!important` globales de los estilos genéricos de botones en `main.css`.
+- Se neutralizaron dentro de `.admin-shell` las propiedades heredadas de altura, `line-height`, espaciado de letras y transformación a mayúsculas.
+- Se añadió un `line-height` explícito al botón principal de autenticación.
+- Con esto recuperan visibilidad los filtros de cubículos, botones secundarios, botones de acción, botones de modal y enlaces tipo botón en las dashboards.
+
+La página pública conserva sus estilos porque las clases `.button` siguen usando la plantilla original.

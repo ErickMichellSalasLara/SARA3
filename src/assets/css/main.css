@@ -1091,10 +1091,10 @@ input[type="submit"],
   appearance: none;
   transition: border-color 0.2s ease;
   background-color: transparent;
-  border: solid 1px !important;
-  border-color: var(--sara-main-border) !important;
+  border: solid 1px;
+  border-color: var(--sara-main-border);
   border-radius: 3em;
-  color: var(--sara-main-text-strong) !important;
+  color: var(--sara-main-text-strong);
   cursor: pointer;
   display: inline-block;
   font-size: 0.6em;
@@ -1168,7 +1168,7 @@ input[type="submit"].primary,
 		button.primary,
 		.button.primary {
   background-color: var(--sara-main-text-strong);
-  color: var(--sara-main-bg) !important;
+  color: var(--sara-main-bg);
 }
 
 input[type="submit"].primary::after,
@@ -1198,7 +1198,7 @@ input[type="submit"]:hover,
 		input[type="button"]:hover,
 		button:hover,
 		.button:hover {
-  border-color: var(--sara-main-text) !important;
+  border-color: var(--sara-main-text);
 }
 
 input[type="submit"]:hover::after,
@@ -1215,7 +1215,7 @@ input[type="submit"]:hover:active,
 			input[type="button"]:hover:active,
 			button:hover:active,
 			.button:hover:active {
-  border-color: var(--sara-main-text-strong) !important;
+  border-color: var(--sara-main-text-strong);
 }
 
 input[type="submit"]:hover:active::after,

@@ -25,6 +25,19 @@
   background: var(--admin-background);
 }
 
+/*
+ * El CSS heredado de la plantilla pública aplica altura, line-height,
+ * espaciado y mayúsculas a todos los <button>. Dentro de las dashboards
+ * neutralizamos únicamente esas propiedades genéricas para que cada
+ * componente conserve sus estilos y su texto sea visible.
+ */
+:where(.admin-shell) button {
+  height: auto;
+  line-height: normal;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .admin-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
